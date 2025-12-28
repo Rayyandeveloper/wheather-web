@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .weather-card {
+      background: #fff;
+      width: 350px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .weather-card h1 {
+      font-size: 24px;
+      /* margin-bottom: 15px; */
+      color: #333; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .search-box button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #667eea;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .weather-info {
+      display: none;
+    }
+
+    .temp {
+      font-size: 48px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .city {
+      font-size: 22px;
+      margin: 10px 0;
+      color: #555;
+    }
+
+    .desc {
+      font-size: 16px;
+      text-transform: capitalize;
+      color: #777;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
+
+    img {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="weather-card">
+    <h1><span><img src="icons/clouds.png" height="60px" width="60px" alt=""></span> Weather App</h1>
+
+    <div class="search-box">
+      <input type="text" id="cityInput" placeholder="Enter city name" />
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div class="weather-info" id="weatherInfo">
+      <img id="weatherIcon" src="" style="width:80px; display:none;">
+      <div class="temp" id="temperature">--°C</div>
+      <div class="city" id="cityName">City</div>
+      <div class="desc" id="description">Description</div>
+    </div>
+
+    <div class="error" id="errorMsg">City not found</div>
+  </div>
+
+  <script>
+    const apiKey = "af72d047bfb65ae2817171cd4ca96fa4";
+
+const searchBtn = document.getElementById("searchBtn");
+const cityInput = document.getElementById("cityInput");
+const weatherInfo = document.getElementById("weatherInfo");
+const temperature = document.getElementById("temperature");
+const cityName = document.getElementById("cityName");
+const description = document.getElementById("description");
+const errorMsg = document.getElementById("errorMsg");
+const weatherIcon = document.getElementById("weatherIcon");
+
+function getWeather(city) {
+  errorMsg.style.display = "none";
+  weatherInfo.style.display = "none";
+
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.cod === "404") {
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      temperature.innerText = Math.round(data.main.temp) + "°C";
+      cityName.innerText = data.name;
+      description.innerText = data.weather[0].description;
+
+      const condition = data.weather[0].main.toLowerCase();
+
+      if (condition.includes("clear")) {
+        weatherIcon.src = "icons/clear.png";
+      }
+      else if (condition.includes("cloud")) {
+        weatherIcon.src = "icons/clouds.png";
+      }
+      else if (condition.includes("humidity")) {
+        weatherIcon.src = "icons/humidity.png";
+      }
+      else if (condition.includes("rain")) {
+        weatherIcon.src = "icons/rain.png";
+      }
+      else if (condition.includes("drizzle")) {
+        weatherIcon.src = "icons/drizzle.png";
+      }
+      else if (condition.includes("snow")) {
+        weatherIcon.src = "icons/snow.png";
+      }
+      else if (condition.includes("thunder")) {
+        weatherIcon.src = "icons/wind.png";
+      }
+      else if (condition.includes("mist") || condition.includes("fog") || condition.includes("haze")) {
+        weatherIcon.src = "icons/mist.png";
+      }
+      else {
+        weatherIcon.src = "icons/clouds.png";
+      }
+
+      weatherIcon.style.display = "block";
+      weatherInfo.style.display = "block";
+    });
+}
+
+searchBtn.addEventListener("click", () => {
+  const city = cityInput.value.trim();
+  if (city) getWeather(city);
+});
+
+cityInput.addEventListener("keyup", e => {
+  if (e.key === "Enter") {
+    const city = cityInput.value.trim();
+    if (city) getWeather(city);
+  }
+});
+
+  </script>
+
+</body>
+</html>
+
