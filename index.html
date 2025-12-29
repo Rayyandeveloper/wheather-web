@@ -18,25 +18,35 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+
+      /* Weather background */
+      background: url("https://images.unsplash.com/photo-1501973801540-537f08ccae7b")
+        no-repeat center center/cover;
     }
 
     .weather-card {
-      background: #fff;
       width: 350px;
       padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      border-radius: 18px;
+
+      /* Glassmorphism */
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
       text-align: center;
     }
 
     .weather-card h1 {
       font-size: 24px;
-      /* margin-bottom: 15px; */
-      color: #333; 
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
     .search-box {
@@ -49,8 +59,9 @@
       flex: 1;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: none;
       outline: none;
+      background: rgba(255, 255, 255, 0.85);
     }
 
     .search-box button {
@@ -58,7 +69,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      background: #667eea;
+      background: rgba(0, 0, 0, 0.6);
       color: #fff;
       font-weight: 600;
     }
@@ -70,23 +81,23 @@
     .temp {
       font-size: 48px;
       font-weight: bold;
-      color: #333;
+      color: #fff;
     }
 
     .city {
       font-size: 22px;
       margin: 10px 0;
-      color: #555;
+      color: #f1f1f1;
     }
 
     .desc {
       font-size: 16px;
       text-transform: capitalize;
-      color: #777;
+      color: #eaeaea;
     }
 
     .error {
-      color: red;
+      color: #ffcccc;
       margin-top: 10px;
       display: none;
     }
@@ -99,7 +110,10 @@
 <body>
 
   <div class="weather-card">
-    <h1><span><img src="icons/clouds.png" height="60px" width="60px" alt=""></span> Weather App</h1>
+    <h1>
+      <img src="icons/clouds.png" height="50" alt="">
+      Weather App
+    </h1>
 
     <div class="search-box">
       <input type="text" id="cityInput" placeholder="Enter city name" />
@@ -107,7 +121,7 @@
     </div>
 
     <div class="weather-info" id="weatherInfo">
-      <img id="weatherIcon" src="" style="width:80px; display:none;">
+      <img id="weatherIcon" style="width:80px; display:none;">
       <div class="temp" id="temperature">--°C</div>
       <div class="city" id="cityName">City</div>
       <div class="desc" id="description">Description</div>
@@ -119,81 +133,65 @@
   <script>
     const apiKey = "af72d047bfb65ae2817171cd4ca96fa4";
 
-const searchBtn = document.getElementById("searchBtn");
-const cityInput = document.getElementById("cityInput");
-const weatherInfo = document.getElementById("weatherInfo");
-const temperature = document.getElementById("temperature");
-const cityName = document.getElementById("cityName");
-const description = document.getElementById("description");
-const errorMsg = document.getElementById("errorMsg");
-const weatherIcon = document.getElementById("weatherIcon");
+    const searchBtn = document.getElementById("searchBtn");
+    const cityInput = document.getElementById("cityInput");
+    const weatherInfo = document.getElementById("weatherInfo");
+    const temperature = document.getElementById("temperature");
+    const cityName = document.getElementById("cityName");
+    const description = document.getElementById("description");
+    const errorMsg = document.getElementById("errorMsg");
+    const weatherIcon = document.getElementById("weatherIcon");
 
-function getWeather(city) {
-  errorMsg.style.display = "none";
-  weatherInfo.style.display = "none";
+    function getWeather(city) {
+      errorMsg.style.display = "none";
+      weatherInfo.style.display = "none";
 
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
-    .then(res => res.json())
-    .then(data => {
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
+      )
+        .then(res => res.json())
+        .then(data => {
+          if (data.cod === "404") {
+            errorMsg.style.display = "block";
+            return;
+          }
 
-      if (data.cod === "404") {
-        errorMsg.style.display = "block";
-        return;
-      }
+          temperature.innerText = Math.round(data.main.temp) + "°C";
+          cityName.innerText = data.name;
+          description.innerText = data.weather[0].description;
 
-      temperature.innerText = Math.round(data.main.temp) + "°C";
-      cityName.innerText = data.name;
-      description.innerText = data.weather[0].description;
+          const condition = data.weather[0].main.toLowerCase();
 
-      const condition = data.weather[0].main.toLowerCase();
+          if (condition.includes("clear")) weatherIcon.src = "icons/clear.png";
+          else if (condition.includes("cloud")) weatherIcon.src = "icons/clouds.png";
+          else if (condition.includes("rain")) weatherIcon.src = "icons/rain.png";
+          else if (condition.includes("drizzle")) weatherIcon.src = "icons/drizzle.png";
+          else if (condition.includes("snow")) weatherIcon.src = "icons/snow.png";
+          else if (condition.includes("thunder")) weatherIcon.src = "icons/wind.png";
+          else if (
+            condition.includes("mist") ||
+            condition.includes("fog") ||
+            condition.includes("haze")
+          ) weatherIcon.src = "icons/mist.png";
+          else weatherIcon.src = "icons/clouds.png";
 
-      if (condition.includes("clear")) {
-        weatherIcon.src = "icons/clear.png";
-      }
-      else if (condition.includes("cloud")) {
-        weatherIcon.src = "icons/clouds.png";
-      }
-      else if (condition.includes("humidity")) {
-        weatherIcon.src = "icons/humidity.png";
-      }
-      else if (condition.includes("rain")) {
-        weatherIcon.src = "icons/rain.png";
-      }
-      else if (condition.includes("drizzle")) {
-        weatherIcon.src = "icons/drizzle.png";
-      }
-      else if (condition.includes("snow")) {
-        weatherIcon.src = "icons/snow.png";
-      }
-      else if (condition.includes("thunder")) {
-        weatherIcon.src = "icons/wind.png";
-      }
-      else if (condition.includes("mist") || condition.includes("fog") || condition.includes("haze")) {
-        weatherIcon.src = "icons/mist.png";
-      }
-      else {
-        weatherIcon.src = "icons/clouds.png";
-      }
+          weatherIcon.style.display = "block";
+          weatherInfo.style.display = "block";
+        });
+    }
 
-      weatherIcon.style.display = "block";
-      weatherInfo.style.display = "block";
+    searchBtn.addEventListener("click", () => {
+      const city = cityInput.value.trim();
+      if (city) getWeather(city);
     });
-}
 
-searchBtn.addEventListener("click", () => {
-  const city = cityInput.value.trim();
-  if (city) getWeather(city);
-});
-
-cityInput.addEventListener("keyup", e => {
-  if (e.key === "Enter") {
-    const city = cityInput.value.trim();
-    if (city) getWeather(city);
-  }
-});
-
+    cityInput.addEventListener("keyup", e => {
+      if (e.key === "Enter") {
+        const city = cityInput.value.trim();
+        if (city) getWeather(city);
+      }
+    });
   </script>
 
 </body>
 </html>
-
